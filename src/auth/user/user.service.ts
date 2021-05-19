@@ -5,6 +5,7 @@ import { switchMap, map } from 'rxjs/operators';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserEntity } from '../entities/user.entity';
+import { UpdateUserDto } from "../dto/update-user.dto";
 
 @Injectable()
 export class UserService {
@@ -40,14 +41,20 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
-  updateOne(id: string, user: UserEntity): Observable<any> {
-    delete user.userEmail;
-    delete user.userPassword;
-    delete user.userName;
-
+  updateOne(id: string, user: UpdateUserDto) {
     return from(this.userRepo.update(id, user)).pipe(
-        switchMap(() => this.findByEmail(id))
+        switchMap(() => this.findById(id))
     );
+}
+
+  // updateOne(id: string, user: UserEntity): Observable<any> {
+  //   delete user.userEmail;
+  //   delete user.userPassword;
+  //   delete user.userName;
+
+  //   return from(this.userRepo.update(id, user)).pipe(
+  //       switchMap(() => this.findByEmail(id))
+  //   );
 }
 
 // findOne(id: string): Observable<UserEntity> {
@@ -58,5 +65,3 @@ export class UserService {
 //       } )
 //   )
 //     }
-
-}

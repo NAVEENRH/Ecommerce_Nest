@@ -29,8 +29,8 @@ export class UserEntity {
   @Column({ type: 'datetime' })
   createdAt: Date;
 
-  // @Column( { nullable: true } )
-  // profileImage: any;
+  @Column( { nullable: true } )
+  profileImage: string;
   
   // @Column( { nullable: true } )
   // Resume: any;

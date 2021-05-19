@@ -23,8 +23,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt.guard';
 import { UserService } from './user/user.service';
-import {diskStorage } from "multer";
-import {FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { UserEntity } from './entities/user.entity';
 import { v4 as uuidv4 } from "uuid";
 import path = require('path');
@@ -77,26 +77,26 @@ export class AuthController {
     return this.userService.findById(req.user.userId);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post("upload")
-  @UseInterceptors(
-      FileInterceptor("image", {
-          storage: diskStorage({
-              destination: "./upload/profileImage",
-              filename: (req: any, file: any, callback: any) => {
-                  return callback(null, `${uuidv4()}${file.originalname}`);
-              },
-          }),
-      })
-  )
- async uploadFile(@UploadedFile() file: Express.Multer.File, @Request() req: any) {
-      const user: UserEntity = req.user.user;
-      console.log(user);
+//   @UseGuards(JwtAuthGuard)
+//   @Post("upload")
+//   @UseInterceptors(
+//       FileInterceptor("image", {
+//           storage: diskStorage({
+//               destination: "./upload/profileImage",
+//               filename: (req: any, file: any, callback: any) => {
+//                   return callback(null, `${uuidv4()}${file.originalname}`);
+//               },
+//           }),
+//       })
+//   )
+//  async uploadFile(@UploadedFile() file: Express.Multer.File, @Request() req: any) {
+//       const user: UserEntity = req.user.user;
+//       console.log(user);
 
-      console.log(file);
+//       console.log(file);
 
-    return of( { imagePath: file.filename } );
-  }
+//     return of( { imagePath: file.filename } );
+//   }
 
 // @UseGuards(JwtAuthGuard)
 //     @Post('upload')
@@ -122,6 +122,40 @@ export class AuthController {
     // findProfileImage(@Param('imagename') imagename, @Res() res): Observable<Object> {
     //     return of(res.sendFile(join(process.cwd(), 'uploads/' + imagename)));
     // }
+  //   @Get('uploads/:fileId')
+  // async serveAvatar(@Param('fileId') fileId, @Res() res): Promise<any> {
+  //   res.sendFile(fileId, { root: 'avatars'});
+  // }
 
+  @UseGuards(JwtAuthGuard)
+    @Post("upload")
+    @UseInterceptors(
+        FileInterceptor("file", {
+            storage: diskStorage({
+                destination: "./upload/profileimage",
+                filename: (req: any, file: any, callback: any) => {
+                    return callback(null, `${uuidv4()}${file.originalname}`);
+                },
+            }),
+        })
+    )
+    uploadFile(@UploadedFile() file: Express.Multer.File, @Request() req) {
+        const user: UserEntity = req.user;
+
+        console.log(file);
+
+        
+        return this.userService
+            .updateOne(user.userId, { profileImage: file.filename })
+            .pipe(
+                tap((user: UserEntity) => console.log(user)),
+                map((user: UserEntity) => ({ profileImage: user.profileImage }))
+            );
+    }
+
+    @Get("profileImage/:fileId")
+    async serveAvatar(@Param("fileId") fileId, @Res() res): Promise<any> {
+        return res.sendFile(fileId, { root: "upload/profileImage" });
+    }
 
 }
